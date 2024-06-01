@@ -6,15 +6,15 @@ import lombok.Data;
 @Data
 public class Product {
     @JacksonXmlProperty(isAttribute = true)
-    private int id;
+    private int id = 1;
     @JacksonXmlProperty(localName = "Name")
-    private String name;
+    private String name = "Unknown name";
     @JacksonXmlProperty(localName = "Category")
-    private String category;
+    private String category = "Unknown category";
     @JacksonXmlProperty(localName = "PartNumberNR")
-    private String partNumberNR;
+    private String partNumberNR = "Unknown PartNumberNR";
     @JacksonXmlProperty(localName = "CompanyName")
-    private String companyName;
+    private String companyName = "Unknown company";
     @JacksonXmlProperty(localName = "Active")
     private boolean active;
 }

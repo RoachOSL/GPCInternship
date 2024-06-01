@@ -1,5 +1,7 @@
 package com.gpcinternship.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.gpcinternship.model.Products;
 
@@ -14,12 +16,19 @@ public class FileUtil {
         }
 
         XmlMapper xmlMapper = new XmlMapper();
-        Products products = xmlMapper.readValue(file, Products.class);
 
-        if (products == null || products.getProducts() == null) {
-            throw new IOException("No valid products found in the file.");
+        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        try {
+            Products products = xmlMapper.readValue(file, Products.class);
+
+            if (products == null || products.getProducts() == null) {
+                throw new IOException("No valid products found in the file.");
+            }
+
+            return products;
+        } catch (JsonProcessingException e) {
+            throw new IOException("Invalid or empty XML content in file: " + filePath, e);
         }
-
-        return products;
     }
 }

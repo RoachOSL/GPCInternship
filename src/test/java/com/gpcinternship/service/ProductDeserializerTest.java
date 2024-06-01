@@ -1,11 +1,12 @@
-package com.gpcinternship.model;
+package com.gpcinternship.service;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.gpcinternship.model.Products;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ProductsTest {
+public class ProductDeserializerTest {
 
     @Test
     public void whenDeserialize_thenCorrect() throws Exception {
@@ -39,6 +40,4 @@ public class ProductsTest {
         assertThat(products.getProducts()[0].getCategory()).isEqualTo("fruit");
         assertThat(products.getProducts()[0].isActive()).isTrue();
     }
-
-
 }

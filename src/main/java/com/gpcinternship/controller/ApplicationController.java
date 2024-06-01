@@ -16,10 +16,8 @@ import java.util.List;
 
 @RestController
 public class ApplicationController {
-
-    private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
-
     private final ProductDeserializer productDeserializer;
+    private final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
 
     @Value("${product.file.path}")
     private String filePath;
