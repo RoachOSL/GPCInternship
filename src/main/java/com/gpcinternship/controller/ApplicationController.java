@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class ApplicationController {
@@ -53,12 +54,12 @@ public class ApplicationController {
     }
 
     @GetMapping(value = "/product", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Product getProductByName() {
+    public Optional<Product> getProductByName() {
         try {
             return productDeserializer.returnProductByGivenName(filePath, productNameToFind);
         } catch (IOException e) {
             logger.error("Error reading file: ", e);
-            return new Product();
+            return Optional.empty();
         }
     }
 

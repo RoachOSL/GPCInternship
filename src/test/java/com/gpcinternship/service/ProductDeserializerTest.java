@@ -1,43 +1,129 @@
 package com.gpcinternship.service;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.gpcinternship.model.Product;
 import com.gpcinternship.model.Products;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+
+@ExtendWith(MockitoExtension.class)
 public class ProductDeserializerTest {
 
+    @Mock
+    private FileValidation fileValidation;
+
+    @InjectMocks
+    private ProductDeserializer productDeserializer;
+
     @Test
-    public void whenDeserialize_thenCorrect() throws Exception {
-        String xmlContent = """
-                <Products>
-                    <Product id="1">
-                        <Name>apple</Name>
-                        <Category>fruit</Category>
-                        <PartNumberNR>2303-E1A-G-M-W209B-VM</PartNumberNR>
-                        <CompanyName>FruitsAll</CompanyName>
-                        <Active>true</Active>
-                    </Product>
-                    <Product id="2">
-                        <Name>orange</Name>
-                        <Category>fruit</Category>
-                        <PartNumberNR>5603-J1A-G-M-W982F-PO</PartNumberNR>
-                        <CompanyName>FruitsAll</CompanyName>
-                        <Active>false</Active>
-                    </Product>
-                </Products>""";
+    void countRecordsFromFileShouldCorrectlyCountRecordsInFile() throws IOException {
+        Products products = new Products();
+        products.setProducts(new Product[]{new Product(), new Product(), new Product()});
 
-        XmlMapper xmlMapper = new XmlMapper();
-        Products products = xmlMapper.readValue(xmlContent, Products.class);
+        when(fileValidation.validateAndParseProductsFile(anyString())).thenReturn(products);
 
-        System.out.println(products);
-
-
-        assertThat(products).isNotNull();
-        assertThat(products.getProducts()).hasSize(2);
-        assertThat(products.getProducts()[0].getName()).isEqualTo("apple");
-        assertThat(products.getProducts()[0].getCategory()).isEqualTo("fruit");
-        assertThat(products.getProducts()[0].isActive()).isTrue();
+        int count = productDeserializer.countRecordsFromFile("test.xml");
+        assertEquals(3, count);
     }
+
+    @Test
+    void returnProductsListShouldListAllProductNames() throws IOException {
+        Product apple = new Product();
+        apple.setName("Apple");
+        Product banana = new Product();
+        banana.setName("Banana");
+
+        Products products = new Products();
+        products.setProducts(new Product[]{apple, banana});
+
+        when(fileValidation.validateAndParseProductsFile("test.xml")).thenReturn(products);
+
+        List<String> productNames = productDeserializer.returnProductsList("test.xml");
+        assertArrayEquals(new String[]{"Apple", "Banana"}, productNames.toArray(new String[0]));
+    }
+
+    @Test
+    void returnProductsListShouldReturnEmptyList() throws IOException {
+        Products emptyProducts = new Products();
+        emptyProducts.setProducts(new Product[0]);
+        when(fileValidation.validateAndParseProductsFile("emptyTest.xml")).thenReturn(emptyProducts);
+
+        List<String> productNames = productDeserializer.returnProductsList("emptyTest.xml");
+        assertTrue(productNames.isEmpty());
+    }
+
+    @Test
+    void returnProductsListShouldThrowIOExceptionWhenFileIsCorrupt() throws IOException {
+        when(fileValidation.validateAndParseProductsFile("corruptTest.xml")).thenThrow(new IOException("File access error"));
+
+        Exception exception = assertThrows(IOException.class, () ->
+                productDeserializer.returnProductsList("corruptTest.xml")
+        );
+
+        assertEquals("File access error", exception.getMessage());
+    }
+
+
+    @Test
+    void returnProductByGivenNameShouldRetrieveProductDetailsByName() throws IOException {
+        Product product = new Product();
+        product.setId(3);
+        product.setName("Carrot");
+        product.setCategory("Vegetable");
+        product.setCompanyName("CarrotCompany");
+        product.setPartNumberNR("512-5FG-FA");
+        product.setActive(true);
+
+        Products products = new Products();
+        products.setProducts(new Product[]{product});
+
+        when(fileValidation.validateAndParseProductsFile("test.xml")).thenReturn(products);
+
+        Optional<Product> foundProduct = productDeserializer.returnProductByGivenName("test.xml", "Carrot");
+        assertTrue(foundProduct.isPresent());
+        assertEquals(3, foundProduct.get().getId());
+        assertEquals("Vegetable", foundProduct.get().getCategory());
+        assertEquals("CarrotCompany", foundProduct.get().getCompanyName());
+        assertEquals("512-5FG-FA", foundProduct.get().getPartNumberNR());
+        assertTrue(foundProduct.get().isActive());
+    }
+
+    @Test
+    void returnProductByGivenNameReturnsEmptyForUnmatchedName() throws IOException {
+        Products products = new Products();
+        products.setProducts(new Product[]{new Product()});
+
+        when(fileValidation.validateAndParseProductsFile("test.xml")).thenReturn(products);
+
+        Optional<Product> result = productDeserializer.returnProductByGivenName("test.xml", "Orange");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void returnProductByGivenNameShouldHandleCaseInsensitiveMatchWhenProductNameDiffersInCase() throws IOException {
+        Product apple = new Product();
+        apple.setName("apple");
+
+        Products products = new Products();
+        products.setProducts(new Product[]{apple});
+
+        when(fileValidation.validateAndParseProductsFile("test.xml")).thenReturn(products);
+
+        Optional<Product> result = productDeserializer.returnProductByGivenName("test.xml", "Apple");
+        assertTrue(result.isPresent());
+        assertEquals("apple", result.get().getName());
+    }
+
+
 }
