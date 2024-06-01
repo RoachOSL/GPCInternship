@@ -43,13 +43,13 @@ public class ApplicationController {
     }
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<String>> getListOfProducts() {
+    public ResponseEntity<List<Product>> getListOfProducts() {
         try {
-            List<String> products = productDeserializer.returnProductsList(filePath);
+            List<Product> products = productDeserializer.returnProductsList(filePath);
             return ResponseEntity.ok(products);
         } catch (IOException e) {
             logger.error("Error reading file: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonList("Error reading file: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
 

@@ -13,8 +13,6 @@ public class GpcInternshipApplicationTests {
     @Autowired
     private ApplicationController applicationController;
 
-
-
     @Test
     void contextLoads() {
         assertThat(applicationController).isNotNull();

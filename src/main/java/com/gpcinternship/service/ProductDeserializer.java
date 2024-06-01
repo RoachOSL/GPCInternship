@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,21 +20,15 @@ public class ProductDeserializer {
         this.fileValidation = fileValidation;
     }
 
-
     public int countRecordsFromFile(String fileName) throws IOException {
         Products products = validateAndLoadProducts(fileName);
         return products.getProducts().length;
     }
 
-    public List<String> returnProductsList(String fileName) throws IOException {
+    public List<Product> returnProductsList(String fileName) throws IOException {
         Products products = validateAndLoadProducts(fileName);
 
-        List<String> explicitProducts = new ArrayList<>();
-
-        for (Product product : products.getProducts()) {
-            explicitProducts.add(product.getName());
-        }
-        return explicitProducts;
+        return new ArrayList<>(Arrays.asList(products.getProducts()));
     }
 
     public Optional<Product> returnProductByGivenName(String fileName, String nameOfProduct) throws IOException {
