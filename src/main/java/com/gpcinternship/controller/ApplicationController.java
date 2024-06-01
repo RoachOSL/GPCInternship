@@ -6,8 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -19,49 +22,48 @@ import java.util.Optional;
 public class ApplicationController {
     private final ProductDeserializer productDeserializer;
     private final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
-
-    @Value("${product.file.path}")
-    private String filePath;
-
-
-    @Value("${product.nameToFind}")
-    private String productNameToFind;
+    private final String filePath;
 
     @Autowired
-    public ApplicationController(ProductDeserializer productDeserializer) {
+    public ApplicationController(ProductDeserializer productDeserializer,
+                                 @Value("${product.file.path}") String filePath) {
         this.productDeserializer = productDeserializer;
+        this.filePath = filePath;
     }
 
     @GetMapping("/")
-    public String getCountOfRecordsFromPath() {
+    public ResponseEntity<String> getCountOfRecordsFromPath() {
         try {
             int count = productDeserializer.countRecordsFromFile(filePath);
-            return "Number of records found in file: " + count;
+            return ResponseEntity.ok("Number of records found in file: " + count);
         } catch (IOException e) {
             logger.error("Error reading file: ", e);
-            return "Error reading file: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error reading file: " + e.getMessage());
         }
     }
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<String> getListOfProducts() {
+    public ResponseEntity<List<String>> getListOfProducts() {
         try {
-            return productDeserializer.returnProductsList(filePath);
+            List<String> products = productDeserializer.returnProductsList(filePath);
+            return ResponseEntity.ok(products);
         } catch (IOException e) {
             logger.error("Error reading file: ", e);
-            return Collections.singletonList("Error reading file: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonList("Error reading file: " + e.getMessage()));
         }
     }
 
     @GetMapping(value = "/product", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Optional<Product> getProductByName() {
+    public ResponseEntity<?> getProductByName(@RequestParam String productName) {
         try {
-            return productDeserializer.returnProductByGivenName(filePath, productNameToFind);
+            Optional<Product> product = productDeserializer.returnProductByGivenName(filePath, productName);
+            if (product.isEmpty()) {
+                return ResponseEntity.ok("Product not found.");
+            }
+            return ResponseEntity.ok(product.get());
         } catch (IOException e) {
             logger.error("Error reading file: ", e);
-            return Optional.empty();
+            return ResponseEntity.internalServerError().body("Error reading file: " + e.getMessage());
         }
     }
-
-
 }
