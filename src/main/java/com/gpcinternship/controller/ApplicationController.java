@@ -55,14 +55,18 @@ public class ApplicationController {
 
     @GetMapping(value = "/product", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getProductByName(@RequestParam String productName) {
+        if (productName == null || productName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Product name is required");
+        }
         try {
             Optional<Product> product = productDeserializer.returnProductByGivenName(filePath, productName);
-            if (product.isEmpty()) {
-                return ResponseEntity.ok("Product not found.");
+            if (product.isPresent()) {
+                return ResponseEntity.ok(product.get());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
             }
-            return ResponseEntity.ok(product.get());
         } catch (IOException e) {
-            logger.error("Error reading file: ", e);
+            logger.error("Error reading file: {}", filePath, e);
             return ResponseEntity.internalServerError().body("Error reading file: " + e.getMessage());
         }
     }

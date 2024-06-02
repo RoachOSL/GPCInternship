@@ -49,9 +49,13 @@ public class ProductDeserializerTest {
 
         when(fileValidation.validateAndParseProductsFile("test.xml")).thenReturn(products);
 
-        List<String> productNames = productDeserializer.returnProductsList("test.xml");
-        assertArrayEquals(new String[]{"Apple", "Banana"}, productNames.toArray(new String[0]));
+        List<Product> productList = productDeserializer.returnProductsList("test.xml");
+
+        assertEquals(2, productList.size());
+        assertTrue(productList.stream().anyMatch(p -> "Apple".equals(p.getName())));
+        assertTrue(productList.stream().anyMatch(p -> "Banana".equals(p.getName())));
     }
+
 
     @Test
     void returnProductsListShouldReturnEmptyList() throws IOException {
@@ -59,7 +63,7 @@ public class ProductDeserializerTest {
         emptyProducts.setProducts(new Product[0]);
         when(fileValidation.validateAndParseProductsFile("emptyTest.xml")).thenReturn(emptyProducts);
 
-        List<String> productNames = productDeserializer.returnProductsList("emptyTest.xml");
+        List<Product> productNames = productDeserializer.returnProductsList("emptyTest.xml");
         assertTrue(productNames.isEmpty());
     }
 

@@ -28,7 +28,7 @@ public class FileValidationTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        tempFile = Files.createTempFile("test", ".txt");
+        tempFile = Files.createTempFile("test", ".xml");
         fileValidation = new FileValidation();
     }
 
@@ -53,9 +53,10 @@ public class FileValidationTest {
 
     @Test
     void shouldThrowIOExceptionWhenFileDoesNotExist() {
-        Exception exception = assertThrows(IOException.class, () -> fileValidation.validateAndParseProductsFile("lostFilePath"));
+        String nonExistentFilePath = "non_existent_file.xml";
+        Exception exception = assertThrows(IOException.class, () -> fileValidation.validateAndParseProductsFile(nonExistentFilePath));
 
-        assertTrue(exception.getMessage().contains("File not found"));
+        assertTrue(exception.getMessage().contains("File not found: " + nonExistentFilePath));
     }
 
     @Test

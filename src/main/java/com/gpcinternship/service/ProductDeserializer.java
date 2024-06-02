@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductDeserializer {
@@ -28,7 +28,7 @@ public class ProductDeserializer {
     public List<Product> returnProductsList(String fileName) throws IOException {
         Products products = validateAndLoadProducts(fileName);
 
-        return new ArrayList<>(Arrays.asList(products.getProducts()));
+        return Arrays.stream(products.getProducts()).collect(Collectors.toList());
     }
 
     public Optional<Product> returnProductByGivenName(String fileName, String nameOfProduct) throws IOException {

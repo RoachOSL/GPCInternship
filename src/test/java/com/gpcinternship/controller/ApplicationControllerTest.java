@@ -5,11 +5,13 @@ import com.gpcinternship.service.ProductDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +24,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ApplicationControllerTest {
     @Mock
-    ProductDeserializer productDeserializer;
+    private ProductDeserializer productDeserializer;
+    @InjectMocks
     private ApplicationController applicationController;
     private final String testFilePath = "test.xml";
 
@@ -32,7 +35,7 @@ public class ApplicationControllerTest {
     }
 
     @Test
-    public void getCountOfRecordsFromPathShouldReturnProperCount() throws Exception {
+    public void getCountOfRecordsFromPathShouldReturnProperCount() throws IOException {
         when(productDeserializer.countRecordsFromFile(testFilePath)).thenReturn(2);
 
         ResponseEntity<String> response = applicationController.getCountOfRecordsFromPath();
@@ -42,17 +45,21 @@ public class ApplicationControllerTest {
     }
 
     @Test
-    public void getListOfProductsShouldReturnCorrectProducts() throws Exception {
-        when(productDeserializer.returnProductsList(testFilePath)).thenReturn(Arrays.asList("Apple", "Banana"));
+    public void getListOfProductsShouldReturnCorrectProducts() throws IOException {
+        Product apple = new Product();
+        apple.setName("Apple");
+        Product banana = new Product();
+        banana.setName("Banana");
+        when(productDeserializer.returnProductsList(testFilePath)).thenReturn(Arrays.asList(apple, banana));
 
-        ResponseEntity<List<String>> response = applicationController.getListOfProducts();
+        ResponseEntity<List<Product>> response = applicationController.getListOfProducts();
 
-        assertEquals(Arrays.asList("Apple", "Banana"), response.getBody());
+        assertEquals(Arrays.asList(apple, banana), response.getBody());
         assertEquals(ResponseEntity.ok().build().getStatusCode(), response.getStatusCode());
     }
 
     @Test
-    public void getProductByNameShouldReturnProductDetails() throws Exception {
+    public void getProductByNameShouldReturnProductDetails() throws IOException {
         Product product = new Product();
         product.setName("Apple");
 
@@ -66,12 +73,28 @@ public class ApplicationControllerTest {
     }
 
     @Test
-    public void getProductByName_ShouldReturnNotFoundMessage() throws Exception {
+    public void getProductByNameShouldReturnNotFoundMessage() throws IOException {
         when(productDeserializer.returnProductByGivenName(testFilePath, "Orange")).thenReturn(Optional.empty());
 
         ResponseEntity<?> response = applicationController.getProductByName("Orange");
 
         assertEquals("Product not found.", response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void getProductByNameShouldReturnBadRequestIfNameIsNull() {
+        ResponseEntity<?> response = applicationController.getProductByName(null);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Product name is required", response.getBody());
+    }
+
+    @Test
+    public void getProductByNameShouldReturnBadRequestIfNameIsEmpty() {
+        ResponseEntity<?> response = applicationController.getProductByName("   ");
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Product name is required", response.getBody());
     }
 }

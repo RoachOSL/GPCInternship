@@ -36,6 +36,12 @@ public class FileValidation {
             throw new IOException(errorMessage);
         }
 
+        if (!filePath.toLowerCase().endsWith(".xml")) {
+            String errorMessage = "Invalid file type: " + filePath + ". Expected an XML file.";
+            logger.error(errorMessage);
+            throw new IOException(errorMessage);
+        }
+
         try {
             Products products = xmlMapper.readValue(file, Products.class);
 
