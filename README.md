@@ -56,9 +56,8 @@ Open your preferred Integrated Development Environment (IDE) that supports Sprin
 Visual Studio Code). Use the IDE's feature to open an existing project and navigate to the directory where you cloned
 the repository.
 
-#### 4. Navigate to the Main Application File: In your IDE’s project explorer, navigate to the GpcInternshipApplication Java
-
-file located at:
+#### 4. Navigate to the Main Application File: 
+In your IDE’s project explorer, navigate to the GpcInternshipApplication.java file located at:
 
 ```
 src/main/java/com/gpcinternship/GpcInternshipApplication.java
@@ -66,7 +65,7 @@ src/main/java/com/gpcinternship/GpcInternshipApplication.java
 
 #### 5. Run the Application:
 
-pen the GpcInternshipApplication.java file, which contains the main method that starts the Spring Boot application.
+Open the GpcInternshipApplication.java file, which contains the main method that starts the Spring Boot application.
 Right-click on the file in your IDE and select Run 'GpcInternshipApplication'. This starts the embedded Apache Tomcat
 server.
 
@@ -150,7 +149,8 @@ message.
 
 HTTP Method: GET
 
-IMPORTANT
+IMPORTANT!
+
 Required Query Parameter: productName - The name of the product to retrieve.
 Just replace {Name of your product} with any valid product name in xml file.
 
