@@ -1,4 +1,4 @@
-# GPCInternship Project
+# XMLtoENDPOINT
 
 This project implements a Java-based service that reads XML data representing product records and provides REST APIs to
 interact with this data. It provides endpoints to count the records, list all products, and retrieve a product by its
